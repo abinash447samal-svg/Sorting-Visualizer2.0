@@ -21,7 +21,7 @@ An interactive **Sorting Algorithm Visualizer** built using HTML, CSS, and JavaS
 ## How to Run
 
 1. Download or clone the repo
-2. Open `sorting_visualizer_with_code.html` in your browser
+2. Open 'Sorting-Visualizer2.0' in your browser
 
 ## Future Improvements
 
