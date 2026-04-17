@@ -23,10 +23,6 @@ An interactive **Sorting Algorithm Visualizer** built using HTML, CSS, and JavaS
 1. Download or clone the repo
 2. Open `sorting_visualizer_with_code.html` in your browser
 
-## Project Structure
-
-* `sorting_visualizer_with_code.html` → Main file
-
 ## Future Improvements
 
 * Add more algorithms
