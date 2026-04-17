@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorting Algorithm Visualizer - With C Code</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        select, input[type="range"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        select {
+            cursor: pointer;
+            background: white;
+        }
+
+        select:hover, select:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+
+        input[type="range"] {
+            cursor: pointer;
+            height: 6px;
+            accent-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        button:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        button.stop {
+            background: #ef4444;
+        }
+
+        button.stop:hover {
+            background: #dc2626;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #999;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .visualizer {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            height: 400px;
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            margin-bottom: 20px;
+        }
+
+        .bar {
+            flex: 1;
+            background: #9ca3af;
+            border-radius: 2px;
+            transition: background 0.1s ease;
+            min-width: 2px;
+        }
+
+        .bar.comparing {
+            background: #fbbf24;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+        }
+
+        .bar.sorted {
+            background: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+        }
+
+        .info {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            padding: 15px;
+            background: #f0f9ff;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 20px;
+        }
+
+        .code-view-wrapper {
+            background: #f8f9fa;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border: 2px solid #e2e8f0;
+        }
+
+        .code-header {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .code-header-left {
+            font-size: 17px;
+            font-weight: 700;
+            color: #1e293b;
+            letter-spacing: 0.5px;
+        }
+
+        .code-header-right {
+            font-size: 13px;
+            color: #0369a1;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            background: rgba(3, 105, 161, 0.08);
+            padding: 6px 14px;
+            border-radius: 5px;
+            border: 1px solid rgba(3, 105, 161, 0.2);
+        }
+
+        .code-container {
+            background: #f8f9fa;
+            padding: 25px 30px;
+            overflow-x: auto;
+            max-height: 650px;
+            overflow-y: auto;
+        }
+
+        .code-container::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        .code-container::-webkit-scrollbar-track {
+            background: #ffffff;
+        }
+
+        .code-container::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 5px;
+        }
+
+        .code-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .code-section {
+            margin-bottom: 15px;
+            border-left: 4px solid #cbd5e0;
+            padding-left: 15px;
+            background: rgba(226, 232, 240, 0.4);
+            padding: 12px 0 12px 15px;
+        }
+
+        .code-title {
+            color: #0369a1;
+            font-size: 15px;
+            margin-bottom: 12px;
+            font-weight: bold;
+            padding: 8px 0;
+            border-bottom: 1px solid #cbd5e0;
+            display: block;
+        }
+
+        #copyCodeBtn {
+            padding: 6px 12px !important;
+            font-size: 12px !important;
+            background: #0369a1 !important;
+            border: 1px solid #0284c7 !important;
+            color: white !important;
+            transition: all 0.2s ease !important;
+        }
+
+        #copyCodeBtn:hover:not(:disabled) {
+            background: #0284c7 !important;
+            transform: scale(1.05) !important;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'Courier New', 'Monaco', monospace;
+            font-size: 15px;
+            line-height: 1.8;
+            color: #1e293b;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .code-line {
+            padding: 4px 8px;
+            margin: 2px 0;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+            display: block;
+            background: rgba(30, 41, 59, 0.04);
+        }
+
+        .code-line:hover {
+            background: rgba(30, 41, 59, 0.08);
+        }
+
+        .code-line.highlight {
+            background: rgba(251, 191, 36, 0.2);
+            border-left-color: #fbbf24;
+        }
+
+        .code-line.sorted-highlight {
+            background: rgba(16, 185, 129, 0.2);
+            border-left-color: #10b981;
+        }
+
+        .keyword { color: #c41e3a; font-weight: 600; }
+        .type { color: #0369a1; font-weight: 600; }
+        .string { color: #15803d; }
+        .comment { color: #64748b; font-style: italic; }
+        .number { color: #d97706; font-weight: 500; }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .visualizer {
+                height: 300px;
+            }
+
+            .code-container {
+                font-size: 12px;
+            }
+
+            .tab-btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sorting Algorithm Visualizer</h1>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="algorithm">Algorithm</label>
+                <select id="algorithm">
+                    <option value="bubble">Bubble sort</option>
+                    <option value="insertion">Insertion sort</option>
+                    <option value="selection">Selection sort</option>
+                    <option value="quick">Quick sort</option>
+                    <option value="merge">Merge sort</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="arraySize">Array size: <span id="sizeValue">50</span></label>
+                <input type="range" id="arraySize" min="10" max="100" value="50">
+            </div>
+
+            <div class="control-group">
+                <label for="speed">Speed</label>
+                <input type="range" id="speed" min="1" max="100" value="50">
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="startBtn">▶ Start sorting</button>
+            <button id="shuffleBtn">🔀 Shuffle</button>
+            <button id="stopBtn" class="stop" style="display: none;">⏹ Stop</button>
+            <button id="soundToggleBtn" style="background: #10b981;">🔊 Sound ON</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Comparisons</div>
+                <div class="stat-value" id="comparisons">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Swaps</div>
+                <div class="stat-value" id="swaps">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Status</div>
+                <div class="stat-value" id="status" style="color: #666; font-size: 14px;">Ready</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="visualizer">Visualization</button>
+            <button class="tab-btn" data-tab="code">📜 C Code</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="visualizer" class="tab-content active">
+            <div class="info">
+                Yellow = comparing, Green = sorted ✓
+            </div>
+            <div class="visualizer" id="bars"></div>
+        </div>
+
+        <div id="code" class="tab-content">
+            <div class="code-view-wrapper">
+                <div class="code-header">
+                    <div class="code-header-left">📜 C program view</div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <div class="code-header-right" id="codeFileName">sorting_algorithm.c</div>
+                        <button id="copyCodeBtn" style="padding: 6px 12px; font-size: 12px; background: #60a5fa;">📋 Copy</button>
+                    </div>
+                </div>
+                <div class="code-container" id="codeDisplay"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const codeSnippets = {
+            bubble: `<span class="code-section"><span class="code-title">// BUBBLE SORT - Complete C Program</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="keyword">#include</span> &lt;stdio.h&gt;</span>
+<span class="code-line"><span class="keyword">#include</span> &lt;stdlib.h&gt;</span>
+<span class="code-line"><span class="keyword">#include</span> &lt;string.h&gt;</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Function to swap two elements */</span></span>
+<span class="code-line"><span class="keyword">void</span> swap(<span class="type">int</span> *a, <span class="type">int</span> *b) {</span>
+<span class="code-line">    <span class="type">int</span> temp = *a;</span>
+<span class="code-line">    *a = *b;</span>
+<span class="code-line">    *b = temp;</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Function to print array */</span></span>
+<span class="code-line"><span class="keyword">void</span> printArray(<span class="type">int</span> arr[], <span class="type">int</span> n) {</span>
+<span class="code-line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span>
+<span class="code-line">        printf(<span class="string">"%d "</span>, arr[i]);</span>
+<span class="code-line">    printf(<span class="string">"\n"</span>);</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Bubble Sort - O(n²) - Compares adjacent pairs and swaps */</span></span>
+<span class="code-line"><span class="keyword">void</span> bubbleSort(<span class="type">int</span> arr[], <span class="type">int</span> n) {</span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n - <span class="number">1</span>; i++) {</span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; n - i - <span class="number">1</span>; j++) {</span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> (arr[j] &gt; arr[j + <span class="number">1</span>])</span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;swap(&amp;arr[j], &amp;arr[j + <span class="number">1</span>]);</span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Main Function */</span></span>
+<span class="code-line"><span class="keyword">int</span> main() {</span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="type">int</span> arr[] = {<span class="number">64</span>, <span class="number">34</span>, <span class="number">25</span>, <span class="number">12</span>, <span class="number">22</span>, <span class="number">11</span>, <span class="number">90</span>};</span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="type">int</span> n = <span class="keyword">sizeof</span>(arr) / <span class="keyword">sizeof</span>(arr[<span class="number">0</span>]);</span>
+<span class="code-line"></span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;printf(<span class="string">"Original Array: "</span>);</span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;printArray(arr, n);</span>
+<span class="code-line"></span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;bubbleSort(arr, n);</span>
+<span class="code-line"></span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;printf(<span class="string">"Sorted Array: "</span>);</span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;printArray(arr, n);</span>
+<span class="code-line"></span>
+<span class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="number">0</span>;</span>
+<span class="code-line">}</span>
+</span>`,
+
+            insertion: `<span class="code-section"><span class="code-title">// INSERTION SORT - Complete C Program</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="keyword">#include</span> &lt;stdio.h&gt;</span>
+<span class="code-line"><span class="keyword">#include</span> &lt;stdlib.h&gt;</span>
+<span class="code-line"><span class="keyword">#include</span> &lt;string.h&gt;</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Function to print array */</span></span>
+<span class="code-line"><span class="keyword">void</span> printArray(<span class="type">int</span> arr[], <span class="type">int</span> n) {</span>
+<span class="code-line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span>
+<span class="code-line">        printf(<span class="string">"%d "</span>, arr[i]);</span>
+<span class="code-line">    printf(<span class="string">"\n"</span>);</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Insertion Sort - O(n²) - Builds sorted array one item at a time */</span></span>
+<span class="code-line"><span class="keyword">void</span> insertionSort(<span class="type">int</span> arr[], <span class="type">int</span> n) {</span>
+<span class="code-line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt; n; i++) {</span>
+<span class="code-line">        <span class="type">int</span> key = arr[i];</span>
+<span class="code-line">        <span class="type">int</span> j = i - <span class="number">1</span>;</span>
+<span class="code-line"></span>
+<span class="code-line">        <span class="comment">/* Shift elements greater than key */</span></span>
+<span class="code-line">        <span class="keyword">while</span> (j &gt;= <span class="number">0</span> &amp;&amp; arr[j] &gt; key) {</span>
+<span class="code-line">            arr[j + <span class="number">1</span>] = arr[j];</span>
+<span class="code-line">            j--;</span>
+<span class="code-line">        }</span>
+<span class="code-line">        arr[j + <span class="number">1</span>] = key;</span>
+<span class="code-line">    }</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Main Function */</span></span>
+<span class="code-line"><span class="keyword">int</span> main() {</span>
+<span class="code-line">    <span class="type">int</span> arr[] = {<span class="number">64</span>, <span class="number">34</span>, <span class="number">25</span>, <span class="number">12</span>, <span class="number">22</span>, <span class="number">11</span>, <span class="number">90</span>};</span>
+<span class="code-line">    <span class="type">int</span> n = <span class="keyword">sizeof</span>(arr) / <span class="keyword">sizeof</span>(arr[<span class="number">0</span>]);</span>
+<span class="code-line"></span>
+<span class="code-line">    printf(<span class="string">"Original Array: "</span>);</span>
+<span class="code-line">    printArray(arr, n);</span>
+<span class="code-line"></span>
+<span class="code-line">    insertionSort(arr, n);</span>
+<span class="code-line"></span>
+<span class="code-line">    printf(<span class="string">"Sorted Array: "</span>);</span>
+<span class="code-line">    printArray(arr, n);</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="keyword">return</span> <span class="number">0</span>;</span>
+<span class="code-line">}</span>
+</span>`,
+
+            selection: `<span class="code-section"><span class="code-title">// SELECTION SORT - Complete C Program</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="keyword">#include</span> &lt;stdio.h&gt;</span>
+<span class="code-line"><span class="keyword">#include</span> &lt;stdlib.h&gt;</span>
+<span class="code-line"><span class="keyword">#include</span> &lt;string.h&gt;</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Function to swap two elements */</span></span>
+<span class="code-line"><span class="keyword">void</span> swap(<span class="type">int</span> *a, <span class="type">int</span> *b) {</span>
+<span class="code-line">    <span class="type">int</span> temp = *a;</span>
+<span class="code-line">    *a = *b;</span>
+<span class="code-line">    *b = temp;</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Function to print array */</span></span>
+<span class="code-line"><span class="keyword">void</span> printArray(<span class="type">int</span> arr[], <span class="type">int</span> n) {</span>
+<span class="code-line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span>
+<span class="code-line">        printf(<span class="string">"%d "</span>, arr[i]);</span>
+<span class="code-line">    printf(<span class="string">"\n"</span>);</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Selection Sort - O(n²) - Finds minimum and places at beginning */</span></span>
+<span class="code-line"><span class="keyword">void</span> selectionSort(<span class="type">int</span> arr[], <span class="type">int</span> n) {</span>
+<span class="code-line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n - <span class="number">1</span>; i++) {</span>
+<span class="code-line">        <span class="type">int</span> minIdx = i;</span>
+<span class="code-line">        <span class="keyword">for</span> (<span class="type">int</span> j = i + <span class="number">1</span>; j &lt; n; j++)</span>
+<span class="code-line">            <span class="keyword">if</span> (arr[j] &lt; arr[minIdx])</span>
+<span class="code-line">                minIdx = j;</span>
+<span class="code-line">        swap(&amp;arr[i], &amp;arr[minIdx]);</span>
+<span class="code-line">    }</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Main Function */</span></span>
+<span class="code-line"><span class="keyword">int</span> main() {</span>
+<span class="code-line">    <span class="type">int</span> arr[] = {<span class="number">64</span>, <span class="number">34</span>, <span class="number">25</span>, <span class="number">12</span>, <span class="number">22</span>, <span class="number">11</span>, <span class="number">90</span>};</span>
+<span class="code-line">    <span class="type">int</span> n = <span class="keyword">sizeof</span>(arr) / <span class="keyword">sizeof</span>(arr[<span class="number">0</span>]);</span>
+<span class="code-line"></span>
+<span class="code-line">    printf(<span class="string">"Original Array: "</span>);</span>
+<span class="code-line">    printArray(arr, n);</span>
+<span class="code-line"></span>
+<span class="code-line">    selectionSort(arr, n);</span>
+<span class="code-line"></span>
+<span class="code-line">    printf(<span class="string">"Sorted Array: "</span>);</span>
+<span class="code-line">    printArray(arr, n);</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="keyword">return</span> <span class="number">0</span>;</span>
+<span class="code-line">}</span>
+</span>`,
+
+            quick: `<span class="code-section"><span class="code-title">// QUICK SORT - Complete C Program</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="keyword">#include</span> &lt;stdio.h&gt;</span>
+<span class="code-line"><span class="keyword">#include</span> &lt;stdlib.h&gt;</span>
+<span class="code-line"><span class="keyword">#include</span> &lt;string.h&gt;</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Function to swap two elements */</span></span>
+<span class="code-line"><span class="keyword">void</span> swap(<span class="type">int</span> *a, <span class="type">int</span> *b) {</span>
+<span class="code-line">    <span class="type">int</span> temp = *a;</span>
+<span class="code-line">    *a = *b;</span>
+<span class="code-line">    *b = temp;</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Function to print array */</span></span>
+<span class="code-line"><span class="keyword">void</span> printArray(<span class="type">int</span> arr[], <span class="type">int</span> n) {</span>
+<span class="code-line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span>
+<span class="code-line">        printf(<span class="string">"%d "</span>, arr[i]);</span>
+<span class="code-line">    printf(<span class="string">"\n"</span>);</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Partition function - places pivot in correct position */</span></span>
+<span class="code-line"><span class="type">int</span> partition(<span class="type">int</span> arr[], <span class="type">int</span> low, <span class="type">int</span> high) {</span>
+<span class="code-line">    <span class="type">int</span> pivot = arr[high];</span>
+<span class="code-line">    <span class="type">int</span> i = low - <span class="number">1</span>;</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="keyword">for</span> (<span class="type">int</span> j = low; j &lt; high; j++) {</span>
+<span class="code-line">        <span class="keyword">if</span> (arr[j] &lt; pivot) {</span>
+<span class="code-line">            i++;</span>
+<span class="code-line">            swap(&amp;arr[i], &amp;arr[j]);</span>
+<span class="code-line">        }</span>
+<span class="code-line">    }</span>
+<span class="code-line">    swap(&amp;arr[i + <span class="number">1</span>], &amp;arr[high]);</span>
+<span class="code-line">    <span class="keyword">return</span> i + <span class="number">1</span>;</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Quick Sort - O(n log n) average - Divide and conquer approach */</span></span>
+<span class="code-line"><span class="keyword">void</span> quickSort(<span class="type">int</span> arr[], <span class="type">int</span> low, <span class="type">int</span> high) {</span>
+<span class="code-line">    <span class="keyword">if</span> (low &lt; high) {</span>
+<span class="code-line">        <span class="type">int</span> pi = partition(arr, low, high);</span>
+<span class="code-line">        quickSort(arr, low, pi - <span class="number">1</span>);</span>
+<span class="code-line">        quickSort(arr, pi + <span class="number">1</span>, high);</span>
+<span class="code-line">    }</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Main Function */</span></span>
+<span class="code-line"><span class="keyword">int</span> main() {</span>
+<span class="code-line">    <span class="type">int</span> arr[] = {<span class="number">64</span>, <span class="number">34</span>, <span class="number">25</span>, <span class="number">12</span>, <span class="number">22</span>, <span class="number">11</span>, <span class="number">90</span>};</span>
+<span class="code-line">    <span class="type">int</span> n = <span class="keyword">sizeof</span>(arr) / <span class="keyword">sizeof</span>(arr[<span class="number">0</span>]);</span>
+<span class="code-line"></span>
+<span class="code-line">    printf(<span class="string">"Original Array: "</span>);</span>
+<span class="code-line">    printArray(arr, n);</span>
+<span class="code-line"></span>
+<span class="code-line">    quickSort(arr, <span class="number">0</span>, n - <span class="number">1</span>);</span>
+<span class="code-line"></span>
+<span class="code-line">    printf(<span class="string">"Sorted Array: "</span>);</span>
+<span class="code-line">    printArray(arr, n);</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="keyword">return</span> <span class="number">0</span>;</span>
+<span class="code-line">}</span>
+</span>`,
+
+            merge: `<span class="code-section"><span class="code-title">// MERGE SORT - Complete C Program</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="keyword">#include</span> &lt;stdio.h&gt;</span>
+<span class="code-line"><span class="keyword">#include</span> &lt;stdlib.h&gt;</span>
+<span class="code-line"><span class="keyword">#include</span> &lt;string.h&gt;</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Function to print array */</span></span>
+<span class="code-line"><span class="keyword">void</span> printArray(<span class="type">int</span> arr[], <span class="type">int</span> n) {</span>
+<span class="code-line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++)</span>
+<span class="code-line">        printf(<span class="string">"%d "</span>, arr[i]);</span>
+<span class="code-line">    printf(<span class="string">"\n"</span>);</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Merge function - combines two sorted sub-arrays */</span></span>
+<span class="code-line"><span class="keyword">void</span> merge(<span class="type">int</span> arr[], <span class="type">int</span> left, <span class="type">int</span> mid, <span class="type">int</span> right) {</span>
+<span class="code-line">    <span class="type">int</span> n1 = mid - left + <span class="number">1</span>;</span>
+<span class="code-line">    <span class="type">int</span> n2 = right - mid;</span>
+<span class="code-line">    <span class="type">int</span> *L = (<span class="type">int</span>*)malloc(n1 * <span class="keyword">sizeof</span>(<span class="type">int</span>));</span>
+<span class="code-line">    <span class="type">int</span> *R = (<span class="type">int</span>*)malloc(n2 * <span class="keyword">sizeof</span>(<span class="type">int</span>));</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n1; i++) L[i] = arr[left + i];</span>
+<span class="code-line">    <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; n2; j++) R[j] = arr[mid + <span class="number">1</span> + j];</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="type">int</span> i = <span class="number">0</span>, j = <span class="number">0</span>, k = left;</span>
+<span class="code-line">    <span class="keyword">while</span> (i &lt; n1 &amp;&amp; j &lt; n2) {</span>
+<span class="code-line">        arr[k++] = (L[i] &lt;= R[j]) ? L[i++] : R[j++];</span>
+<span class="code-line">    }</span>
+<span class="code-line">    <span class="keyword">while</span> (i &lt; n1) arr[k++] = L[i++];</span>
+<span class="code-line">    <span class="keyword">while</span> (j &lt; n2) arr[k++] = R[j++];</span>
+<span class="code-line">    free(L); free(R);</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Merge Sort - O(n log n) - Divide and conquer with merging */</span></span>
+<span class="code-line"><span class="keyword">void</span> mergeSort(<span class="type">int</span> arr[], <span class="type">int</span> left, <span class="type">int</span> right) {</span>
+<span class="code-line">    <span class="keyword">if</span> (left &lt; right) {</span>
+<span class="code-line">        <span class="type">int</span> mid = left + (right - left) / <span class="number">2</span>;</span>
+<span class="code-line">        mergeSort(arr, left, mid);</span>
+<span class="code-line">        mergeSort(arr, mid + <span class="number">1</span>, right);</span>
+<span class="code-line">        merge(arr, left, mid, right);</span>
+<span class="code-line">    }</span>
+<span class="code-line">}</span>
+<span class="code-line"></span>
+<span class="code-line"><span class="comment">/* Main Function */</span></span>
+<span class="code-line"><span class="keyword">int</span> main() {</span>
+<span class="code-line">    <span class="type">int</span> arr[] = {<span class="number">64</span>, <span class="number">34</span>, <span class="number">25</span>, <span class="number">12</span>, <span class="number">22</span>, <span class="number">11</span>, <span class="number">90</span>};</span>
+<span class="code-line">    <span class="type">int</span> n = <span class="keyword">sizeof</span>(arr) / <span class="keyword">sizeof</span>(arr[<span class="number">0</span>]);</span>
+<span class="code-line"></span>
+<span class="code-line">    printf(<span class="string">"Original Array: "</span>);</span>
+<span class="code-line">    printArray(arr, n);</span>
+<span class="code-line"></span>
+<span class="code-line">    mergeSort(arr, <span class="number">0</span>, n - <span class="number">1</span>);</span>
+<span class="code-line"></span>
+<span class="code-line">    printf(<span class="string">"Sorted Array: "</span>);</span>
+<span class="code-line">    printArray(arr, n);</span>
+<span class="code-line"></span>
+<span class="code-line">    <span class="keyword">return</span> <span class="number">0</span>;</span>
+<span class="code-line">}</span>
+</span>`
+        };
+
+        class SortingVisualizer {
+            constructor() {
+                this.array = [];
+                this.sorting = false;
+                this.comparing = [];
+                this.sorted = [];
+                this.swaps = 0;
+                this.comparisons = 0;
+                this.abortSort = false;
+                this.soundEnabled = true;
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                this.cacheElements();
+                this.attachListeners();
+                this.generateArray();
+                this.updateCode();
+            }
+
+            cacheElements() {
+                this.algorithmSelect = document.getElementById('algorithm');
+                this.arraySizeInput = document.getElementById('arraySize');
+                this.speedInput = document.getElementById('speed');
+                this.startBtn = document.getElementById('startBtn');
+                this.shuffleBtn = document.getElementById('shuffleBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.soundToggleBtn = document.getElementById('soundToggleBtn');
+                this.visualizer = document.getElementById('bars');
+                this.comparisonsDisplay = document.getElementById('comparisons');
+                this.swapsDisplay = document.getElementById('swaps');
+                this.statusDisplay = document.getElementById('status');
+                this.sizeValue = document.getElementById('sizeValue');
+                this.codeDisplay = document.getElementById('codeDisplay');
+                this.codeFileName = document.getElementById('codeFileName');
+            }
+
+            attachListeners() {
+                this.startBtn.addEventListener('click', () => this.startSort());
+                this.shuffleBtn.addEventListener('click', () => this.generateArray());
+                this.stopBtn.addEventListener('click', () => this.stop());
+                this.soundToggleBtn.addEventListener('click', () => this.toggleSound());
+                document.getElementById('copyCodeBtn').addEventListener('click', () => this.copyCode());
+                this.arraySizeInput.addEventListener('change', () => {
+                    this.sizeValue.textContent = this.arraySizeInput.value;
+                    this.generateArray();
+                });
+                this.algorithmSelect.addEventListener('change', () => {
+                    this.updateCode();
+                });
+
+                // Tab switching
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const tabName = e.target.dataset.tab;
+                        this.switchTab(tabName);
+                    });
+                });
+            }
+
+            switchTab(tabName) {
+                // Hide all tabs
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                // Show selected tab
+                document.getElementById(tabName).classList.add('active');
+                document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            }
+
+            updateCode() {
+                const algorithm = this.algorithmSelect.value;
+                let codeHTML = codeSnippets[algorithm];
+                
+                // Fix indentation by converting spaces to &nbsp; in code lines
+                codeHTML = codeHTML.replace(/<span class="code-line">( +)(?=[^ ])/g, function(match, spaces) {
+                    return '<span class="code-line">' + spaces.split('').map(() => '&nbsp;').join('');
+                });
+                
+                this.codeDisplay.innerHTML = codeHTML;
+                
+                // Update filename
+                const fileNames = {
+                    'bubble': 'bubble_sort.c',
+                    'insertion': 'insertion_sort.c',
+                    'selection': 'selection_sort.c',
+                    'quick': 'quick_sort.c',
+                    'merge': 'merge_sort.c'
+                };
+                this.codeFileName.textContent = fileNames[algorithm];
+            }
+
+            copyCode() {
+                // Extract text from code display (remove HTML tags)
+                const codeText = this.codeDisplay.innerText || this.codeDisplay.textContent;
+                navigator.clipboard.writeText(codeText).then(() => {
+                    const copyBtn = document.getElementById('copyCodeBtn');
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = '✅ Copied!';
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                    }, 2000);
+                }).catch(err => {
+                    alert('Failed to copy code');
+                    console.error('Copy failed:', err);
+                });
+            }
+
+            toggleSound() {
+                this.soundEnabled = !this.soundEnabled;
+                this.soundToggleBtn.textContent = this.soundEnabled ? '🔊 Sound ON' : '🔇 Sound OFF';
+                this.soundToggleBtn.style.background = this.soundEnabled ? '#10b981' : '#ef4444';
+            }
+
+            playComparison() {
+                if (!this.soundEnabled) return;
+                
+                try {
+                    const now = this.audioContext.currentTime;
+                    const osc = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    
+                    osc.connect(gain);
+                    gain.connect(this.audioContext.destination);
+                    
+                    osc.frequency.value = 500; // Lower frequency
+                    osc.type = 'triangle';
+                    
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                    
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } catch (e) {
+                    console.log('Sound not available');
+                }
+            }
+
+            playSwap() {
+                if (!this.soundEnabled) return;
+                
+                try {
+                    const now = this.audioContext.currentTime;
+                    const osc = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    
+                    osc.connect(gain);
+                    gain.connect(this.audioContext.destination);
+                    
+                    osc.frequency.value = 800; // Mid frequency
+                    osc.type = 'sine';
+                    
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+                    
+                    osc.start(now);
+                    osc.stop(now + 0.12);
+                } catch (e) {
+                    console.log('Sound not available');
+                }
+            }
+
+            playFinishingSound() {
+                if (!this.soundEnabled) return;
+                
+                try {
+                    const now = this.audioContext.currentTime;
+                    
+                    // Three ascending notes for celebration
+                    const notes = [523.25, 659.25, 783.99]; // C, E, G
+                    
+                    notes.forEach((freq, idx) => {
+                        const osc = this.audioContext.createOscillator();
+                        const gain = this.audioContext.createGain();
+                        
+                        osc.connect(gain);
+                        gain.connect(this.audioContext.destination);
+                        
+                        osc.frequency.value = freq;
+                        osc.type = 'sine';
+                        
+                        const startTime = now + idx * 0.15;
+                        gain.gain.setValueAtTime(0.3, startTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.3);
+                        
+                        osc.start(startTime);
+                        osc.stop(startTime + 0.3);
+                    });
+                } catch (e) {
+                    console.log('Sound not available');
+                }
+            }
+
+            generateArray() {
+                const size = parseInt(this.arraySizeInput.value);
+                this.array = Array.from({ length: size }, () => Math.floor(Math.random() * 100) + 1);
+                this.sorted = [];
+                this.comparing = [];
+                this.swaps = 0;
+                this.comparisons = 0;
+                this.updateStats();
+                this.render();
+            }
+
+            sleep(ms) {
+                return new Promise(r => setTimeout(r, ms));
+            }
+
+            getDelay() {
+                return 101 - parseInt(this.speedInput.value);
+            }
+
+            updateStats() {
+                this.comparisonsDisplay.textContent = this.comparisons;
+                this.swapsDisplay.textContent = this.swaps;
+            }
+
+            render() {
+                this.visualizer.innerHTML = '';
+                const maxVal = Math.max(...this.array);
+
+                this.array.forEach((val, idx) => {
+                    const bar = document.createElement('div');
+                    bar.className = 'bar';
+                    bar.style.height = `${(val / maxVal) * 100}%`;
+
+                    if (this.sorted.includes(idx)) {
+                        bar.classList.add('sorted');
+                    } else if (this.comparing.includes(idx)) {
+                        bar.classList.add('comparing');
+                    }
+
+                    this.visualizer.appendChild(bar);
+                });
+            }
+
+            setComparing(indices) {
+                this.comparing = indices;
+                this.render();
+            }
+
+            setSorted(indices) {
+                this.sorted = indices;
+                this.render();
+            }
+
+            disableControls(disabled) {
+                this.algorithmSelect.disabled = disabled;
+                this.arraySizeInput.disabled = disabled;
+                this.startBtn.disabled = disabled;
+                this.shuffleBtn.disabled = disabled;
+                this.startBtn.style.display = disabled ? 'none' : 'block';
+                this.stopBtn.style.display = disabled ? 'block' : 'none';
+            }
+
+            async bubbleSort() {
+                let arr = [...this.array];
+                
+                for (let i = 0; i < arr.length; i++) {
+                    for (let j = 0; j < arr.length - i - 1; j++) {
+                        if (this.abortSort) return;
+
+                        this.setComparing([j, j + 1]);
+                        this.playComparison();
+                        this.comparisons++;
+                        this.updateStats();
+                        await this.sleep(this.getDelay());
+
+                        if (arr[j] > arr[j + 1]) {
+                            [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                            this.array = arr;
+                            this.playSwap();
+                            this.swaps++;
+                            this.updateStats();
+                            this.render();
+                        }
+                    }
+                    const sorted = Array.from({ length: i + 1 }, (_, x) => arr.length - 1 - x);
+                    this.setSorted(sorted);
+                }
+                
+                this.setSorted(Array.from({ length: arr.length }, (_, i) => i));
+            }
+
+            async insertionSort() {
+                let arr = [...this.array];
+                
+                for (let i = 1; i < arr.length; i++) {
+                    let key = arr[i];
+                    let j = i - 1;
+
+                    while (j >= 0 && arr[j] > key) {
+                        if (this.abortSort) return;
+
+                        this.setComparing([j, i]);
+                        this.playComparison();
+                        this.comparisons++;
+                        this.updateStats();
+                        await this.sleep(this.getDelay());
+
+                        arr[j + 1] = arr[j];
+                        this.array = arr;
+                        this.playSwap();
+                        this.swaps++;
+                        this.updateStats();
+                        this.render();
+                        j--;
+                    }
+                    arr[j + 1] = key;
+                    this.array = arr;
+                    this.setSorted(Array.from({ length: i + 1 }, (_, x) => x));
+                }
+                
+                this.setSorted(Array.from({ length: arr.length }, (_, i) => i));
+            }
+
+            async selectionSort() {
+                let arr = [...this.array];
+                
+                for (let i = 0; i < arr.length; i++) {
+                    let minIdx = i;
+                    
+                    for (let j = i + 1; j < arr.length; j++) {
+                        if (this.abortSort) return;
+
+                        this.setComparing([minIdx, j]);
+                        this.playComparison();
+                        this.comparisons++;
+                        this.updateStats();
+                        await this.sleep(this.getDelay());
+
+                        if (arr[j] < arr[minIdx]) {
+                            minIdx = j;
+                        }
+                    }
+
+                    if (minIdx !== i) {
+                        [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+                        this.array = arr;
+                        this.playSwap();
+                        this.swaps++;
+                        this.updateStats();
+                        this.render();
+                    }
+                    
+                    this.setSorted(Array.from({ length: i + 1 }, (_, x) => x));
+                }
+                
+                this.setSorted(Array.from({ length: arr.length }, (_, i) => i));
+            }
+
+            async quickSort() {
+                let arr = [...this.array];
+                
+                const partition = async (low, high) => {
+                    let pivot = arr[high];
+                    let i = low - 1;
+
+                    for (let j = low; j < high; j++) {
+                        if (this.abortSort) return i + 1;
+
+                        this.setComparing([j, high]);
+                        this.playComparison();
+                        this.comparisons++;
+                        this.updateStats();
+                        await this.sleep(this.getDelay());
+
+                        if (arr[j] < pivot) {
+                            i++;
+                            [arr[i], arr[j]] = [arr[j], arr[i]];
+                            this.array = arr;
+                            this.playSwap();
+                            this.swaps++;
+                            this.updateStats();
+                            this.render();
+                        }
+                    }
+                    [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+                    this.array = arr;
+                    this.playSwap();
+                    this.swaps++;
+                    this.updateStats();
+                    this.render();
+                    return i + 1;
+                };
+
+                const quickSortHelper = async (low, high) => {
+                    if (low < high) {
+                        let pi = await partition(low, high);
+                        await quickSortHelper(low, pi - 1);
+                        await quickSortHelper(pi + 1, high);
+                    }
+                };
+
+                await quickSortHelper(0, arr.length - 1);
+                this.setSorted(Array.from({ length: arr.length }, (_, i) => i));
+            }
+
+            async mergeSort() {
+                let arr = [...this.array];
+
+                const merge = async (left, mid, right) => {
+                    let leftArr = arr.slice(left, mid + 1);
+                    let rightArr = arr.slice(mid + 1, right + 1);
+                    let i = 0, j = 0, k = left;
+
+                    while (i < leftArr.length && j < rightArr.length) {
+                        if (this.abortSort) return;
+
+                        this.setComparing([left + i, mid + 1 + j]);
+                        this.playComparison();
+                        this.comparisons++;
+                        this.updateStats();
+                        await this.sleep(this.getDelay());
+
+                        if (leftArr[i] <= rightArr[j]) {
+                            arr[k++] = leftArr[i++];
+                        } else {
+                            arr[k++] = rightArr[j++];
+                        }
+                        this.array = arr;
+                        this.playSwap();
+                        this.swaps++;
+                        this.updateStats();
+                        this.render();
+                    }
+
+                    while (i < leftArr.length) arr[k++] = leftArr[i++];
+                    while (j < rightArr.length) arr[k++] = rightArr[j++];
+                    this.array = arr;
+                    this.render();
+                };
+
+                const mergeSortHelper = async (left, right) => {
+                    if (left < right) {
+                        let mid = Math.floor((left + right) / 2);
+                        await mergeSortHelper(left, mid);
+                        await mergeSortHelper(mid + 1, right);
+                        await merge(left, mid, right);
+                    }
+                };
+
+                await mergeSortHelper(0, arr.length - 1);
+                this.setSorted(Array.from({ length: arr.length }, (_, i) => i));
+            }
+
+            async startSort() {
+                this.sorting = true;
+                this.abortSort = false;
+                this.disableControls(true);
+                this.statusDisplay.textContent = 'Sorting...';
+
+                const algorithm = this.algorithmSelect.value;
+                
+                switch(algorithm) {
+                    case 'bubble':
+                        await this.bubbleSort();
+                        break;
+                    case 'insertion':
+                        await this.insertionSort();
+                        break;
+                    case 'selection':
+                        await this.selectionSort();
+                        break;
+                    case 'quick':
+                        await this.quickSort();
+                        break;
+                    case 'merge':
+                        await this.mergeSort();
+                        break;
+                }
+
+                this.sorting = false;
+                this.disableControls(false);
+                this.comparing = [];
+                this.playFinishingSound();
+                this.statusDisplay.textContent = 'Done! ✓';
+                this.render();
+            }
+
+            stop() {
+                this.abortSort = true;
+                this.sorting = false;
+                this.disableControls(false);
+                this.statusDisplay.textContent = 'Stopped';
+                this.comparing = [];
+                this.render();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            new SortingVisualizer();
+        });
+    </script>
+</body>
+</html>
